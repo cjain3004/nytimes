@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="eb509348-503a-4cd2-a85c-fb606a7f9512" >
+		<http:request-connection host="api.nytimes.com" protocol="HTTPS"/>
+	</http:request-config>
+	<sub-flow name="archiveflow" doc:id="f43434fa-771c-4715-a8bf-8994db3c3afd" >
+		<http:request method="GET" doc:name="Request" doc:id="09bde8ad-2ebf-46b1-89ba-f3ff6a17f069" config-ref="HTTP_Request_configuration" path="/svc/archive/v1/{year}/{month}.json">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"month" : attributes.uriParams.month,
+	"year" : attributes.uriParams.year
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"api-key" : attributes.queryParams.key
+}]]]></http:query-params>
+		</http:request>
+	</sub-flow>
+	<sub-flow name="searchArticleFlow" doc:id="0e47a45a-1447-44df-bc17-145417b3bf98" >
+		<http:request method="GET" doc:name="Request" doc:id="3fa834e0-11f5-4f8f-96c3-94fe0c76efb9" config-ref="HTTP_Request_configuration" path="/svc/search/v2/articlesearch.json">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"api-key" : attributes.queryParams.key,
+	"q" : attributes.queryParams.q
+}]]]></http:query-params>
+		</http:request>
+	</sub-flow>
+	<sub-flow name="booksFlow" doc:id="d09182d9-51b7-48f5-b49e-3387df77591d" >
+		<http:request method="PUT" doc:name="Request" doc:id="2959e430-92a7-4875-92ae-88fb546a30ad" path="/svc/books/v3/lists/current/hardcover-fiction.json" config-ref="HTTP_Request_configuration">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"api-key" : attributes.queryParams.key
+}]]]></http:query-params>
+		</http:request>
+	</sub-flow>
+	<sub-flow name="mostPopularFlow" doc:id="9f9a86bb-07e0-42ef-9486-008395a4955e" >
+		<http:request method="GET" doc:name="Request" doc:id="1b8934c8-a0fd-49c1-88ce-c1ef2b372b4c" config-ref="HTTP_Request_configuration" path="/svc/mostpopular/v2/emailed/{period}.json">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"period" : attributes.uriParams.period
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"api-key" : attributes.queryParams.key
+}]]]></http:query-params>
+		</http:request>
+	</sub-flow>
+</mule>
